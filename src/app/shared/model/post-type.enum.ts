@@ -1,3 +1,5 @@
+import {isInEnum} from "../utils/enum.utils";
+
 export enum PostType {
   Pin = 'pin',
   InstagramMedia = 'instagram_media',
@@ -6,3 +8,5 @@ export enum PostType {
   Tweet = 'tweet',
   FacebookStatus = 'facebook_status',
 }
+
+export const isValidPostType = (value: string): value is PostType => isInEnum<string>(PostType)(value);
