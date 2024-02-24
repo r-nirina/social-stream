@@ -1,22 +1,37 @@
-import { Injectable } from '@angular/core';
+import {Injectable, OnDestroy, OnInit} from '@angular/core';
+import {UpfluenceStreamWorkerCommand, UpfluenceStreamWorkerCommands} from "../model/upfluence-stream.model";
 
 @Injectable({
   providedIn: 'root'
 })
-export class UpfluenceStreamService {
-  initStream() {
-    // TODO
-  }
-}
+export class UpfluenceStreamService implements OnInit, OnDestroy {
+  private worker: Worker = null;
 
-if (typeof Worker !== 'undefined') {
-  // Create a new
-  const worker = new Worker(new URL('./upfluence-stream.worker', import.meta.url));
-  worker.onmessage = ({ data }) => {
-    console.log(`page got message: ${data}`);
-  };
-  worker.postMessage('hello');
-} else {
-  // Web Workers are not supported in this environment.
-  // You should add a fallback so that your program still executes correctly.
+  ngOnInit() {
+    this.initWorker();
+  }
+  ngOnDestroy() {
+    this.destroyWorker();
+  }
+
+  initStream() {
+    this.postCommand({ type: UpfluenceStreamWorkerCommands.InitStream });
+  }
+
+  private initWorker() {
+    try {
+      this.destroyWorker();
+      this.worker = new Worker(new URL('../worker/upfluence-stream.worker', import.meta.url));
+    } catch (e) {
+      throw new Error('Web Workers are not supported in this environment', { cause: e });
+    }
+  }
+  private destroyWorker() {
+    this.worker?.terminate();
+    this.worker = null;
+  }
+
+  private postCommand(command: UpfluenceStreamWorkerCommand) {
+    this.worker?.postMessage(command);
+  }
 }
