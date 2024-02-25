@@ -4,7 +4,9 @@ import {
   isValidUpfluenceStreamWorkerCommand,
   UpfluenceStreamWorkerCommand,
   UpfluenceStreamWorkerCommands,
-  UpfluenceStreamWorkerErrors
+  UpfluenceStreamWorkerErrors,
+  UpfluenceStreamWorkerMessage,
+  UpfluenceStreamWorkerMessages
 } from "../model/upfluence-stream.model";
 import {CONFIG} from "../../../environments/environment.config";
 
@@ -12,18 +14,19 @@ class UpfluenceStreamWorker {
   private eventSource: EventSource = null;
 
   constructor() {
-    addEventListener('message', (message: MessageEvent) => {
-      if (this.isValidCommand(message)) {
-        this.handleCommand(message.data as UpfluenceStreamWorkerCommand);
+    addEventListener('message', (event: MessageEvent) => {
+      if (this.isValidCommand(event)) {
+        this.handleCommand(event.data as UpfluenceStreamWorkerCommand);
       } else {
         throw new Error(UpfluenceStreamWorkerErrors.InvalidCommand);
       }
     });
+    this.postMessage({ type: UpfluenceStreamWorkerMessages.WorkerReady });
   }
 
-  private isValidCommand(message: MessageEvent): boolean {
+  private isValidCommand(event: MessageEvent): boolean {
     try {
-      return isValidUpfluenceStreamWorkerCommand(message.data.type);
+      return isValidUpfluenceStreamWorkerCommand(event.data.type);
     } catch (e) {
       return false;
     }
@@ -34,6 +37,10 @@ class UpfluenceStreamWorker {
         this.initStream();
         break;
     }
+  }
+
+  private postMessage(message: UpfluenceStreamWorkerMessage) {
+    postMessage(message);
   }
 
   private initStream() {

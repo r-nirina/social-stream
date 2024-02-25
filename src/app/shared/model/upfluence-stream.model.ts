@@ -5,11 +5,13 @@ export enum UpfluenceStreamWorkerCommands {
   InitStream = 'INIT_STREAM',
 }
 export enum UpfluenceStreamWorkerMessages {
+  WorkerReady = 'WORKER_READY',
   StreamInitialized = 'STREAM_INITIALIZED',
 }
 
 export enum UpfluenceStreamWorkerErrors {
   InvalidCommand = 'INVALID_COMMAND',
+  InvalidMessage = 'INVALID_MESSAGE',
 }
 
 export interface UpfluenceStreamWorkerCommand<T = unknown> extends Message<UpfluenceStreamWorkerCommands, T> {}
