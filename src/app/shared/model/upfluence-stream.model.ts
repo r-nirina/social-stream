@@ -1,4 +1,4 @@
-import {Message} from "../utils/message.utils";
+import {Message} from "./message.model";
 import {isInEnum} from "../utils/enum.utils";
 
 export enum UpfluenceStreamWorkerCommands {
