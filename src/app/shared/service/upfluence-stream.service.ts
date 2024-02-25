@@ -4,7 +4,7 @@ import {
   UpfluenceStreamWorkerCommand,
   UpfluenceStreamWorkerCommands, UpfluenceStreamWorkerErrors,
   UpfluenceStreamWorkerMessage, UpfluenceStreamWorkerMessages
-} from "../model/upfluence-stream.model";
+} from "../model/upfluence-stream-worker.model";
 import {BehaviorSubject, Observable} from "rxjs";
 
 @Injectable({
@@ -31,13 +31,7 @@ export class UpfluenceStreamService implements OnDestroy {
     try {
       this.destroyWorker();
       const worker: Worker = new Worker(new URL('../worker/upfluence-stream.worker', import.meta.url));
-      worker.onmessage = (event: MessageEvent) => {
-        if (this.isValidMessage(event)) {
-          this.handleMessage(event.data as UpfluenceStreamWorkerMessage);
-        } else {
-          throw new Error(UpfluenceStreamWorkerErrors.InvalidMessage);
-        }
-      }
+      this.initMessageHandler(worker);
       this.worker = worker;
     } catch (e) {
       throw new Error('Web Workers are not supported in this environment', { cause: e });
@@ -49,7 +43,17 @@ export class UpfluenceStreamService implements OnDestroy {
     this.worker = null;
   }
 
-  private postCommand(command: UpfluenceStreamWorkerCommand) {
+  private initMessageHandler(worker: Worker) {
+    worker.addEventListener('message', (event: MessageEvent) => {
+      if (this.isValidMessage(event)) {
+        this.handleMessage(event.data as UpfluenceStreamWorkerMessage);
+      } else {
+        throw new Error(UpfluenceStreamWorkerErrors.InvalidMessage);
+      }
+    });
+  }
+
+  private postCommand<T>(command: UpfluenceStreamWorkerCommand<T>) {
     this.worker?.postMessage(command);
   }
 
@@ -66,6 +70,9 @@ export class UpfluenceStreamService implements OnDestroy {
         this.handleWorkerReady();
         break;
       case UpfluenceStreamWorkerMessages.StreamInitialized:
+        break;
+      default:
+        console.log(message);
         break;
     }
   }
