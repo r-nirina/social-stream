@@ -4,7 +4,13 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideEffects } from '@ngrx/effects';
+import { provideStore } from '@ngrx/store';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideAnimationsAsync(), provideEffects()]
+  providers: [
+    provideRouter(routes),
+    provideAnimationsAsync(),
+    provideEffects(),
+    provideStore(),
+  ]
 };
