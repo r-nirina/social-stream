@@ -8,11 +8,11 @@ import {
   UpfluenceStreamWorkerMessage,
   UpfluenceStreamWorkerMessages
 } from "../model/upfluence-stream-worker.model";
-import { CONFIG } from "../../../environments/environment.config";
-import { PostType } from "../model/post-type.enum";
-import { catchError, filter, map, Observable, of, OperatorFunction, Subject } from "rxjs";
-import { Article, FacebookStatus, InstagramMedia, Pin, Post, Tweet, YouTubeVideo } from "../model/post.model";
-import { UpfluenceStreamEvent } from "../model/upfluence-stream.model";
+import {CONFIG} from "../../../environments/environment.config";
+import {PostType} from "../model/post-type.enum";
+import {catchError, filter, map, Observable, of, OperatorFunction, Subject} from "rxjs";
+import {Article, FacebookStatus, InstagramMedia, Pin, Post, Tweet, YouTubeVideo} from "../model/post.model";
+import {UpfluenceStreamEvent} from "../model/upfluence-stream.model";
 
 class UpfluenceStreamWorker {
   private eventSource: EventSource = null;
@@ -107,6 +107,9 @@ class UpfluenceStreamWorker {
 
     const eventSource: EventSource = new EventSource(CONFIG.UpfluenceStreamURL);
 
+    eventSource.addEventListener('open', () => {
+      this.postMessage({ type: UpfluenceStreamWorkerMessages.StreamInitialized });
+    });
     eventSource.addEventListener('message', (event: MessageEvent<string>) => {
       this.rawEvents$.next(event.data);
     });

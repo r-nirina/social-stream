@@ -71,8 +71,17 @@ export class UpfluenceStreamService implements OnDestroy {
         break;
       case UpfluenceStreamWorkerMessages.StreamInitialized:
         break;
-      default:
-        console.log(message);
+      case UpfluenceStreamWorkerMessages.NewPin:
+        break;
+      case UpfluenceStreamWorkerMessages.NewInstagramMedia:
+        break;
+      case UpfluenceStreamWorkerMessages.NewYouTubeVideo:
+        break;
+      case UpfluenceStreamWorkerMessages.NewArticle:
+        break;
+      case UpfluenceStreamWorkerMessages.NewTweet:
+        break;
+      case UpfluenceStreamWorkerMessages.NewFacebookStatus:
         break;
     }
   }
