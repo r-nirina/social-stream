@@ -1,11 +1,8 @@
-import {Injectable, OnDestroy} from '@angular/core';
-import {
-  isValidUpfluenceStreamWorkerMessage,
-  UpfluenceStreamWorkerCommand,
-  UpfluenceStreamWorkerCommands, UpfluenceStreamWorkerErrors,
-  UpfluenceStreamWorkerMessage, UpfluenceStreamWorkerMessages
-} from "../model/upfluence-stream-worker.model";
-import {BehaviorSubject, Observable} from "rxjs";
+import { Injectable, OnDestroy } from '@angular/core';
+import { UpfluenceStreamWorkerNS as WorkerNS } from "../model/upfluence-stream-worker.model";
+import { BehaviorSubject, Observable } from "rxjs";
+import { PostsStore } from "../store/posts.store";
+import { StatsService } from "./stats.service";
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +11,12 @@ export class UpfluenceStreamService implements OnDestroy {
   private worker: Worker = null;
 
   private readonly _workerReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  get workerReady$(): Observable<boolean> { return this._workerReady$.asObservable(); }
+  readonly workerReady$: Observable<boolean> = this._workerReady$.asObservable();
 
-  constructor() {
+  constructor(
+    private postsStore: PostsStore,
+    private statsService: StatsService,
+  ) {
     this.initWorker();
   }
   ngOnDestroy() {
@@ -24,7 +24,7 @@ export class UpfluenceStreamService implements OnDestroy {
   }
 
   initStream() {
-    this.postCommand({ type: UpfluenceStreamWorkerCommands.InitStream });
+    this.postCommand({ type: WorkerNS.Commands.InitStream });
   }
 
   private initWorker() {
@@ -46,47 +46,43 @@ export class UpfluenceStreamService implements OnDestroy {
   private initMessageHandler(worker: Worker) {
     worker.addEventListener('message', (event: MessageEvent) => {
       if (this.isValidMessage(event)) {
-        this.handleMessage(event.data as UpfluenceStreamWorkerMessage);
+        this.handleMessage(event.data as WorkerNS.Message);
       } else {
-        throw new Error(UpfluenceStreamWorkerErrors.InvalidMessage);
+        throw new Error(WorkerNS.Errors.InvalidMessage);
       }
     });
   }
 
-  private postCommand<T>(command: UpfluenceStreamWorkerCommand<T>) {
+  private postCommand<T>(command: WorkerNS.Command<T>) {
     this.worker?.postMessage(command);
   }
 
   private isValidMessage(event: MessageEvent): boolean {
     try {
-      return isValidUpfluenceStreamWorkerMessage(event.data.type);
+      return WorkerNS.isValidMessage(event.data.type);
     } catch (e) {
       return false;
     }
   }
-  private handleMessage(message: UpfluenceStreamWorkerMessage) {
+  private handleMessage(message: WorkerNS.Message) {
     switch (message?.type) {
-      case UpfluenceStreamWorkerMessages.WorkerReady:
+      case WorkerNS.Messages.WorkerReady:
         this.handleWorkerReady();
         break;
-      case UpfluenceStreamWorkerMessages.StreamInitialized:
+      case WorkerNS.Messages.StreamInitialized:
         break;
-      case UpfluenceStreamWorkerMessages.NewPin:
-        break;
-      case UpfluenceStreamWorkerMessages.NewInstagramMedia:
-        break;
-      case UpfluenceStreamWorkerMessages.NewYouTubeVideo:
-        break;
-      case UpfluenceStreamWorkerMessages.NewArticle:
-        break;
-      case UpfluenceStreamWorkerMessages.NewTweet:
-        break;
-      case UpfluenceStreamWorkerMessages.NewFacebookStatus:
+      case WorkerNS.Messages.NewPost:
+        this.handleNewPost((<WorkerNS.Message<WorkerNS.NewPostPayload>>message).payload);
         break;
     }
   }
 
   private handleWorkerReady() {
     this._workerReady$.next(true);
+  }
+
+  private handleNewPost({ postType, post }: WorkerNS.NewPostPayload) {
+    this.postsStore.saveNewPost(postType, post);
+    this.statsService.computeStats(postType, post);
   }
 }

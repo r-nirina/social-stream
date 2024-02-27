@@ -1,26 +1,29 @@
-import { Message as GenericMessage } from "./message.model";
-import { isInEnum } from "../utils/enum.utils";
+import {Message as GenericMessage} from "./message.model";
+import {isInEnum} from "../utils/enum.utils";
 import {PostType} from "./post-type.enum";
 import {Post} from "./post.model";
+import {PostStat} from "./post-stat.model";
 
-export namespace UpfluenceStreamWorkerNS {
+export namespace StatsWorkerNS {
   export enum Commands {
-    InitStream = 'INIT_STREAM',
+    ComputeStats = 'COMPUTE_POST_TYPE_STATS',
   }
   export enum Messages {
-    WorkerReady = 'WORKER_READY',
-    StreamInitialized = 'STREAM_INITIALIZED',
-    NewPost = 'NewPost',
+    StatsComputed = 'POST_TYPE_STATS_COMPUTED',
   }
   export enum Errors {
     InvalidCommand = 'INVALID_COMMAND',
     InvalidMessage = 'INVALID_MESSAGE',
   }
 
-  interface Payload {}
-  export interface NewPostPayload<P extends Post = Post> extends Payload {
+  interface Payload {
     postType: PostType;
-    post: P;
+  }
+  export interface ComputeStatsPayload extends Payload {
+    post: Post;
+  }
+  export interface StatsComputedPayload extends Payload {
+    stats: Array<PostStat>;
   }
 
   export interface Command<P extends Partial<Payload> = unknown> extends GenericMessage<Commands, P> {}
@@ -29,3 +32,5 @@ export namespace UpfluenceStreamWorkerNS {
   export const isValidCommand = (value: string): value is Commands => isInEnum<string>(Commands)(value);
   export const isValidMessage = (value: string): value is Messages => isInEnum<string>(Messages)(value);
 }
+
+

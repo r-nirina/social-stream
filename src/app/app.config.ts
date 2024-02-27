@@ -5,13 +5,13 @@ import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
-import { UpfluenceStreamEffects } from "./core/effects/upfluence-stream.effects";
+import { BackgroundTasksEffects } from "./core/effects/background-tasks-effects.service";
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideEffects(UpfluenceStreamEffects),
+    provideEffects(BackgroundTasksEffects),
     provideStore(),
   ]
 };
