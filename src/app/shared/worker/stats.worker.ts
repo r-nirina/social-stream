@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import {PostStat, PostStatsSorted} from "../model/post-stat.model";
+import {PostStat, PostStatsIndex} from "../model/post-stat.model";
 import {StatsWorkerNS} from "../model/stats-worker.model";
 import {BehaviorSubject, map, Observable, OperatorFunction} from "rxjs";
 import {PostType} from "../model/post-type.enum";
@@ -8,14 +8,14 @@ import {Hour, Weekday} from "../model/axis.enum";
 import {mapTimestampToHour, mapTimestampToWeekday} from "../utils/axis.utils";
 
 class StatsWorker {
-  private readonly pinStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
-  private readonly instagramMediaStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
-  private readonly youTubeVideoStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
-  private readonly articleStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
-  private readonly tweetStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
-  private readonly facebookStatusStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
+  private readonly pinStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
+  private readonly instagramMediaStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
+  private readonly youTubeVideoStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
+  private readonly articleStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
+  private readonly tweetStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
+  private readonly facebookStatusStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
 
-  private stats$(postType: PostType): BehaviorSubject<PostStatsSorted> {
+  private stats$(postType: PostType): BehaviorSubject<PostStatsIndex> {
     switch (postType) {
       case PostType.Pin:
         return this.pinStats$;
@@ -38,7 +38,7 @@ class StatsWorker {
   }
   private initSubscriptions() {
     Object.values(PostType).forEach((postType: PostType) => {
-      this.stats$(postType).pipe(StatsWorker.mapSortedStatsToArray).subscribe(
+      this.stats$(postType).pipe(StatsWorker.mapStatsIndexToArray).subscribe(
         (stats: Array<PostStat>) => this.postMessage<StatsWorkerNS.StatsComputedPayload>({
           type: StatsWorkerNS.Messages.StatsComputed,
           payload: { stats, postType },
@@ -76,7 +76,7 @@ class StatsWorker {
   }
 
   private computeStats({ postType, post }: StatsWorkerNS.ComputeStatsPayload) {
-    const acc: PostStatsSorted = this.stats$(postType).value;
+    const acc: PostStatsIndex = this.stats$(postType).value;
 
     const weekday: Weekday = mapTimestampToWeekday(post.timestamp);
     const hour: Hour = mapTimestampToHour(post.timestamp);
@@ -95,8 +95,8 @@ class StatsWorker {
     });
   }
 
-  private static readonly mapSortedStatsToArray: OperatorFunction<PostStatsSorted, Array<PostStat>> =
-    (source: Observable<PostStatsSorted>) => source.pipe(
+  private static readonly mapStatsIndexToArray: OperatorFunction<PostStatsIndex, Array<PostStat>> =
+    (source: Observable<PostStatsIndex>) => source.pipe(
       map((stats) => Object.values(stats).flatMap(
         s => Object.values(s),
       )),
