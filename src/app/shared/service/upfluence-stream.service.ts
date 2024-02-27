@@ -11,7 +11,7 @@ export class UpfluenceStreamService implements OnDestroy {
   private worker: Worker = null;
 
   private readonly _workerReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  get workerReady$(): Observable<boolean> { return this._workerReady$.asObservable(); }
+  readonly workerReady$: Observable<boolean> = this._workerReady$.asObservable();
 
   constructor(
     private postsStore: PostsStore,

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, Observable} from "rxjs";
 import {PostStat} from "../model/post-stat.model";
 import {PostType} from "../model/post-type.enum";
 
@@ -7,33 +7,40 @@ import {PostType} from "../model/post-type.enum";
   providedIn: 'root'
 })
 export class StatsStore {
-  private readonly pinStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _pinStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
-  private readonly instagramMediaStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _instagramMediaStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
-  private readonly youTubeVideoStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _youTubeVideoStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
-  private readonly articleStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _articleStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
-  private readonly tweetStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _tweetStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
-  private readonly facebookStatusStats$: BehaviorSubject<Array<PostStat>> =
+  private readonly _facebookStatusStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
+
+  readonly pinStats$: Observable<Array<PostStat>> = this._pinStats$.asObservable();
+  readonly instagramMediaStats$: Observable<Array<PostStat>> = this._instagramMediaStats$.asObservable();
+  readonly youTubeVideoStats$: Observable<Array<PostStat>> = this._youTubeVideoStats$.asObservable();
+  readonly articleStats$: Observable<Array<PostStat>> = this._articleStats$.asObservable();
+  readonly tweetStats$: Observable<Array<PostStat>> = this._tweetStats$.asObservable();
+  readonly facebookStatusStats$: Observable<Array<PostStat>> = this._facebookStatusStats$.asObservable();
 
   private statsStore$(postType: PostType): BehaviorSubject<Array<PostStat>> {
     switch (postType) {
       case PostType.Pin:
-        return this.pinStats$;
+        return this._pinStats$;
       case PostType.InstagramMedia:
-        return this.instagramMediaStats$;
+        return this._instagramMediaStats$;
       case PostType.YouTubeVideo:
-        return this.youTubeVideoStats$;
+        return this._youTubeVideoStats$;
       case PostType.Article:
-        return this.articleStats$;
+        return this._articleStats$;
       case PostType.Tweet:
-        return this.tweetStats$;
+        return this._tweetStats$;
       case PostType.FacebookStatus:
-        return this.facebookStatusStats$;
+        return this._facebookStatusStats$;
     }
   }
 
