@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject} from "rxjs";
 import {PostStat} from "../model/post-stat.model";
+import {PostType} from "../model/post-type.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -19,22 +20,24 @@ export class StatsStore {
   private readonly facebookStatusStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
 
-  updatePinStats(stats: Array<PostStat>) {
-    this.pinStats$.next(stats);
+  private stats$(postType: PostType): BehaviorSubject<Array<PostStat>> {
+    switch (postType) {
+      case PostType.Pin:
+        return this.pinStats$;
+      case PostType.InstagramMedia:
+        return this.instagramMediaStats$;
+      case PostType.YouTubeVideo:
+        return this.youTubeVideoStats$;
+      case PostType.Article:
+        return this.articleStats$;
+      case PostType.Tweet:
+        return this.tweetStats$;
+      case PostType.FacebookStatus:
+        return this.facebookStatusStats$;
+    }
   }
-  updateInstagramMediaStats(stats: Array<PostStat>) {
-    this.instagramMediaStats$.next(stats);
-  }
-  updateYouTubeVideoStats(stats: Array<PostStat>) {
-    this.youTubeVideoStats$.next(stats);
-  }
-  updateArticleStats(stats: Array<PostStat>) {
-    this.articleStats$.next(stats);
-  }
-  updateTweetStats(stats: Array<PostStat>) {
-    this.tweetStats$.next(stats);
-  }
-  updateFacebookStatusStats(stats: Array<PostStat>) {
-    this.facebookStatusStats$.next(stats);
+
+  updateStats(postType: PostType, stats: Array<PostStat>) {
+    this.stats$(postType).next(stats);
   }
 }
