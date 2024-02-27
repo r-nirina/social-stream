@@ -10,10 +10,10 @@ import {AsyncPipe} from "@angular/common";
   imports: [
     AsyncPipe
   ],
-  templateUrl: './chart.component.html',
-  styleUrl: './chart.component.scss'
+  templateUrl: './chart-view.component.html',
+  styleUrl: './chart-view.component.scss'
 })
-export class ChartComponent {
+export class ChartViewComponent {
   protected readonly postType$: Observable<PostType> = this.route.paramMap
     .pipe(map((paramMap: ParamMap) => paramMap.get('postType')))
     .pipe(map((param: string): PostType => isValidPostType(param) ? param : null))

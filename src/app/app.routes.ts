@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { ChartComponent } from "./module/chart/chart.component";
+import { ChartViewComponent } from "./module/chart-view/chart-view.component";
 
 export const routes: Routes = [
-  { path: 'chart/:postType', title: 'Chart View', component: ChartComponent },
+  { path: 'chart/:postType', title: 'Chart View', component: ChartViewComponent },
 ];
