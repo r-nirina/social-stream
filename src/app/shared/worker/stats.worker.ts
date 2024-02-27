@@ -6,7 +6,6 @@ import {BehaviorSubject, map, Observable, OperatorFunction} from "rxjs";
 import {PostType} from "../model/post-type.enum";
 import {Hour, Weekday} from "../model/axis.enum";
 import {mapTimestampToHour, mapTimestampToWeekday} from "../utils/axis.utils";
-import Messages = StatsWorkerNS.Messages;
 
 class StatsWorker {
   private readonly pinStats$: BehaviorSubject<PostStatsSorted> = new BehaviorSubject<PostStatsSorted>({});
@@ -41,7 +40,7 @@ class StatsWorker {
     Object.values(PostType).forEach((postType: PostType) => {
       this.stats$(postType).pipe(StatsWorker.mapSortedStatsToArray).subscribe(
         (stats: Array<PostStat>) => this.postMessage<StatsWorkerNS.StatsComputedPayload>({
-          type: Messages.StatsComputed,
+          type: StatsWorkerNS.Messages.StatsComputed,
           payload: { stats, postType },
         }),
       );

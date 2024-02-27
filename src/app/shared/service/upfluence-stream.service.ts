@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { UpfluenceStreamWorkerNS as WorkerNS } from "../model/upfluence-stream-worker.model";
 import { BehaviorSubject, Observable } from "rxjs";
 import { PostsStore } from "../store/posts.store";
+import { StatsService } from "./stats.service";
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,10 @@ export class UpfluenceStreamService implements OnDestroy {
   private readonly _workerReady$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   get workerReady$(): Observable<boolean> { return this._workerReady$.asObservable(); }
 
-  constructor(private postsStore: PostsStore) {
+  constructor(
+    private postsStore: PostsStore,
+    private statsService: StatsService,
+  ) {
     this.initWorker();
   }
   ngOnDestroy() {
@@ -79,5 +83,6 @@ export class UpfluenceStreamService implements OnDestroy {
 
   private handleNewPost({ postType, post }: WorkerNS.NewPostPayload) {
     this.postsStore.saveNewPost(postType, post);
+    this.statsService.computeStats(postType, post);
   }
 }

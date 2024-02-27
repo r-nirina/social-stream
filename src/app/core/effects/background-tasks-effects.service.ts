@@ -4,13 +4,15 @@ import {createEffect} from "@ngrx/effects";
 import {filter, tap} from "rxjs";
 
 @Injectable()
-export class UpfluenceStreamEffects {
-  constructor(private upfluenceStreamSrv: UpfluenceStreamService) {}
+export class BackgroundTasksEffects {
+  constructor(
+    private upfluenceStreamService: UpfluenceStreamService,
+  ) {}
 
-  initStream$ = createEffect(
-    () => this.upfluenceStreamSrv.workerReady$.pipe(
+  initUpfluenceStream$ = createEffect(
+    () => this.upfluenceStreamService.workerReady$.pipe(
       filter((workerReady) => workerReady),
-      tap(() => this.upfluenceStreamSrv.initStream()),
+      tap(() => this.upfluenceStreamService.initStream()),
     ),
     { dispatch: false },
   );
