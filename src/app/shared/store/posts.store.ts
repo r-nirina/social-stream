@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from "rxjs";
 import { Article, FacebookStatus, InstagramMedia, Pin, Post, Tweet, YouTubeVideo } from "../model/post.model";
+import {PostType} from "../model/post-type.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -19,29 +20,34 @@ export class PostsStore {
   private readonly facebookStatus$: BehaviorSubject<Record<Post['id'], FacebookStatus>> =
     new BehaviorSubject<Record<Post['id'], FacebookStatus>>({});
 
-  private saveNewPost<P extends Post>(post: P, postStore$: BehaviorSubject<Record<Post['id'], P>>) {
-    postStore$.next({
-      ...postStore$.value,
-      [post.id]: post,
-    });
+  private postsStore$(postType: PostType):
+    BehaviorSubject<Record<Post['id'], Pin>>
+    | BehaviorSubject<Record<Post['id'], InstagramMedia>>
+    | BehaviorSubject<Record<Post['id'], YouTubeVideo>>
+    | BehaviorSubject<Record<Post['id'], Article>>
+    | BehaviorSubject<Record<Post['id'], Tweet>>
+    | BehaviorSubject<Record<Post['id'], FacebookStatus>> {
+    switch (postType) {
+      case PostType.Pin:
+        return this.pin$;
+      case PostType.InstagramMedia:
+        return this.instagramMedia$;
+      case PostType.YouTubeVideo:
+        return this.youTubeVideo$;
+      case PostType.Article:
+        return this.article$;
+      case PostType.Tweet:
+        return this.tweet$;
+      case PostType.FacebookStatus:
+        return this.facebookStatus$;
+    }
   }
 
-  saveNewPin(pin: Pin) {
-    this.saveNewPost<Pin>(pin, this.pin$);
-  }
-  saveNewInstagramMedia(instagramMedia: InstagramMedia) {
-    this.saveNewPost<InstagramMedia>(instagramMedia, this.instagramMedia$);
-  }
-  saveNewYouTubeVideo(youTubeVideo: YouTubeVideo) {
-    this.saveNewPost<YouTubeVideo>(youTubeVideo, this.youTubeVideo$);
-  }
-  saveNewArticle(article: Article) {
-    this.saveNewPost<Article>(article, this.article$);
-  }
-  saveNewTweet(tweet: Tweet) {
-    this.saveNewPost<Tweet>(tweet, this.tweet$);
-  }
-  saveNewFacebookStatus(facebookStatus: FacebookStatus) {
-    this.saveNewPost<FacebookStatus>(facebookStatus, this.facebookStatus$);
+  saveNewPost<P extends Post>(postType: PostType, post: P) {
+    const postsStore$ = this.postsStore$(postType);
+    postsStore$.next(<any>{
+      ...postsStore$.value,
+      [post.id]: post,
+    });
   }
 }

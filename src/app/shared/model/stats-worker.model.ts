@@ -26,8 +26,8 @@ export namespace StatsWorkerNS {
     stats: Array<PostStat>;
   }
 
-  export interface Command<Payload extends Partial<Payload> = unknown> extends GenericMessage<Commands, Payload> {}
-  export interface Message<Payload extends Partial<Payload> = unknown> extends GenericMessage<Messages, Payload> {}
+  export interface Command<P extends Partial<Payload> = unknown> extends GenericMessage<Commands, P> {}
+  export interface Message<P extends Partial<Payload> = unknown> extends GenericMessage<Messages, P> {}
 
   export const isValidCommand = (value: string): value is Commands => isInEnum<string>(Commands)(value);
   export const isValidMessage = (value: string): value is Messages => isInEnum<string>(Messages)(value);

@@ -1,18 +1,11 @@
 /// <reference lib="webworker" />
 
-import {
-  isValidUpfluenceStreamWorkerCommand,
-  UpfluenceStreamWorkerCommand,
-  UpfluenceStreamWorkerCommands,
-  UpfluenceStreamWorkerErrors,
-  UpfluenceStreamWorkerMessage,
-  UpfluenceStreamWorkerMessages
-} from "../model/upfluence-stream-worker.model";
-import {CONFIG} from "../../../environments/environment.config";
-import {PostType} from "../model/post-type.enum";
-import {catchError, filter, map, Observable, of, OperatorFunction, Subject} from "rxjs";
-import {Article, FacebookStatus, InstagramMedia, Pin, Post, Tweet, YouTubeVideo} from "../model/post.model";
-import {UpfluenceStreamEvent} from "../model/upfluence-stream.model";
+import { CONFIG } from "../../../environments/environment.config";
+import { PostType } from "../model/post-type.enum";
+import { catchError, filter, map, Observable, of, OperatorFunction, Subject } from "rxjs";
+import { Article, FacebookStatus, InstagramMedia, Pin, Post, Tweet, YouTubeVideo } from "../model/post.model";
+import { UpfluenceStreamEvent } from "../model/upfluence-stream.model";
+import { UpfluenceStreamWorkerNS as WorkerNS } from "../model/upfluence-stream-worker.model";
 
 class UpfluenceStreamWorker {
   private eventSource: EventSource = null;
@@ -42,63 +35,68 @@ class UpfluenceStreamWorker {
     UpfluenceStreamWorker.mapEventToPostOperator<FacebookStatus>(PostType.FacebookStatus),
   );
 
+  private posts$(postType: PostType):
+    Observable<Pin>
+    | Observable<InstagramMedia>
+    | Observable<YouTubeVideo>
+    | Observable<Article>
+    | Observable<Tweet>
+    | Observable<FacebookStatus> {
+    switch (postType) {
+      case PostType.Pin:
+        return this.pin$;
+      case PostType.InstagramMedia:
+        return this.instagramMedia$;
+      case PostType.YouTubeVideo:
+        return this.youTubeVideo$;
+      case PostType.Article:
+        return this.article$;
+      case PostType.Tweet:
+        return this.tweet$;
+      case PostType.FacebookStatus:
+        return this.facebookStatus$;
+    }
+  }
+
   constructor() {
     this.initSubscriptions();
     this.initCommandHandler();
-    this.postMessage({ type: UpfluenceStreamWorkerMessages.WorkerReady });
+    this.postMessage({ type: WorkerNS.Messages.WorkerReady });
   }
   private initSubscriptions() {
-    this.pin$.subscribe((payload: Pin) => this.postMessage<Pin>({
-      type: UpfluenceStreamWorkerMessages.NewPin,
-      payload,
-    }));
-    this.instagramMedia$.subscribe((payload: InstagramMedia) => this.postMessage<InstagramMedia>({
-      type: UpfluenceStreamWorkerMessages.NewInstagramMedia,
-      payload,
-    }));
-    this.youTubeVideo$.subscribe((payload: YouTubeVideo) => this.postMessage<YouTubeVideo>({
-      type: UpfluenceStreamWorkerMessages.NewYouTubeVideo,
-      payload,
-    }));
-    this.article$.subscribe((payload: Article) => this.postMessage<Article>({
-      type: UpfluenceStreamWorkerMessages.NewArticle,
-      payload,
-    }));
-    this.tweet$.subscribe((payload: Tweet) => this.postMessage<Tweet>({
-      type: UpfluenceStreamWorkerMessages.NewTweet,
-      payload,
-    }));
-    this.facebookStatus$.subscribe((payload: FacebookStatus) => this.postMessage<FacebookStatus>({
-      type: UpfluenceStreamWorkerMessages.NewFacebookStatus,
-      payload,
-    }));
+    Object.values(PostType).forEach((postType: PostType) => {
+      this.posts$(postType).subscribe((post: Post) => this.postMessage<WorkerNS.NewPostPayload>({
+        type: WorkerNS.Messages.NewPost,
+        payload: { postType, post },
+      }));
+    });
   }
   private initCommandHandler() {
     addEventListener('message', (event: MessageEvent) => {
       if (this.isValidCommand(event)) {
-        this.handleCommand(event.data as UpfluenceStreamWorkerCommand);
+        this.handleCommand(event.data as WorkerNS.Command);
       } else {
-        throw new Error(UpfluenceStreamWorkerErrors.InvalidCommand);
+        throw new Error(WorkerNS.Errors.InvalidCommand);
       }
     });
   }
 
   private isValidCommand(event: MessageEvent): boolean {
     try {
-      return isValidUpfluenceStreamWorkerCommand(event.data.type);
+      return WorkerNS.isValidCommand(event.data.type);
     } catch (e) {
       return false;
     }
   }
-  private handleCommand(command: UpfluenceStreamWorkerCommand) {
+  private handleCommand(command: WorkerNS.Command) {
     switch (command.type) {
-      case UpfluenceStreamWorkerCommands.InitStream:
+      case WorkerNS.Commands.InitStream:
         this.initStream();
         break;
     }
   }
 
-  private postMessage<T>(message: UpfluenceStreamWorkerMessage<T>) {
+  private postMessage<T>(message: WorkerNS.Message<T>) {
     postMessage(message);
   }
 
@@ -108,7 +106,7 @@ class UpfluenceStreamWorker {
     const eventSource: EventSource = new EventSource(CONFIG.UpfluenceStreamURL);
 
     eventSource.addEventListener('open', () => {
-      this.postMessage({ type: UpfluenceStreamWorkerMessages.StreamInitialized });
+      this.postMessage({ type: WorkerNS.Messages.StreamInitialized });
     });
     eventSource.addEventListener('message', (event: MessageEvent<string>) => {
       this.rawEvents$.next(event.data);

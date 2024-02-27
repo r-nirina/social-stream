@@ -20,7 +20,7 @@ export class StatsStore {
   private readonly facebookStatusStats$: BehaviorSubject<Array<PostStat>> =
     new BehaviorSubject<Array<PostStat>>([]);
 
-  private stats$(postType: PostType): BehaviorSubject<Array<PostStat>> {
+  private statsStore$(postType: PostType): BehaviorSubject<Array<PostStat>> {
     switch (postType) {
       case PostType.Pin:
         return this.pinStats$;
@@ -38,6 +38,6 @@ export class StatsStore {
   }
 
   updateStats(postType: PostType, stats: Array<PostStat>) {
-    this.stats$(postType).next(stats);
+    this.statsStore$(postType).next(stats);
   }
 }
