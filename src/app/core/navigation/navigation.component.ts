@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { RouterLink } from "@angular/router";
-import { PostType } from "../../shared/model/post-type.enum";
+import {PostType, postTypeLabel} from "../../shared/model/post-type.enum";
 
 @Component({
   selector: 'app-navigation',
@@ -36,4 +36,6 @@ export class NavigationComponent {
       map(result => result.matches),
       shareReplay()
     );
+
+  protected readonly postTypeLabel = postTypeLabel;
 }

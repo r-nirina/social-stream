@@ -1,1 +1,4 @@
-<p>chart works! {{ postType$ | async }}</p>
+<app-chart
+  [postType]="postType$ | async"
+  [stats]="statsStore$ | async"
+></app-chart>

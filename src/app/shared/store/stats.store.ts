@@ -27,7 +27,7 @@ export class StatsStore {
   readonly tweetStats$: Observable<Array<PostStat>> = this._tweetStats$.asObservable();
   readonly facebookStatusStats$: Observable<Array<PostStat>> = this._facebookStatusStats$.asObservable();
 
-  private statsStore$(postType: PostType): BehaviorSubject<Array<PostStat>> {
+  private _statsStore$(postType: PostType): BehaviorSubject<Array<PostStat>> {
     switch (postType) {
       case PostType.Pin:
         return this._pinStats$;
@@ -44,7 +44,24 @@ export class StatsStore {
     }
   }
 
+  statsStore$(postType: PostType): Observable<Array<PostStat>> {
+    switch (postType) {
+      case PostType.Pin:
+        return this.pinStats$;
+      case PostType.InstagramMedia:
+        return this.instagramMediaStats$;
+      case PostType.YouTubeVideo:
+        return this.youTubeVideoStats$;
+      case PostType.Article:
+        return this.articleStats$;
+      case PostType.Tweet:
+        return this.tweetStats$;
+      case PostType.FacebookStatus:
+        return this.facebookStatusStats$;
+    }
+  }
+
   updateStats(postType: PostType, stats: Array<PostStat>) {
-    this.statsStore$(postType).next(stats);
+    this._statsStore$(postType).next(stats);
   }
 }
