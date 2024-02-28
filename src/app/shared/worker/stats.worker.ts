@@ -6,6 +6,7 @@ import {BehaviorSubject, map, Observable, OperatorFunction} from "rxjs";
 import {PostType} from "../model/post-type.enum";
 import {Hour, Weekday} from "../model/axis.enum";
 import {mapTimestampToHour, mapTimestampToWeekday} from "../utils/axis.utils";
+import {sortPostStat} from "../utils/post-stat.utils";
 
 class StatsWorker {
   private readonly pinStats$: BehaviorSubject<PostStatsIndex> = new BehaviorSubject<PostStatsIndex>({});
@@ -99,7 +100,7 @@ class StatsWorker {
     (source: Observable<PostStatsIndex>) => source.pipe(
       map((stats) => Object.values(stats).flatMap(
         s => Object.values(s),
-      )),
+      ).sort(sortPostStat)),
     );
 }
 

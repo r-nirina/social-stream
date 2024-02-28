@@ -20,6 +20,7 @@ export class ChartComponent {
     return {
       title: {
         text: postTypeLabel(postType),
+        fontFamily: 'Titillium Web',
       },
       series: [{
         type: 'bubble',
@@ -28,8 +29,24 @@ export class ChartComponent {
         sizeKey: propertyOf<PostStat>('postsCount'),
         data: stats,
       }],
+      axes: [
+        {
+          type: 'category',
+          position: 'bottom',
+          title: {
+            text: 'Hour of the day (UTC)',
+            fontFamily: 'Titillium Web',
+          },
+        },
+        {
+          type: 'category',
+          position: 'left',
+          title: {
+            text: 'Day of the week (UTC)',
+            fontFamily: 'Titillium Web',
+          },
+        },
+      ],
     };
   }
-
-  constructor() {}
 }
