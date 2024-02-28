@@ -4,11 +4,13 @@ import {AgChartOptions} from "ag-charts-community";
 import {PostStat} from "../../model/post-stat.model";
 import {propertyOf} from "../../utils/model.utils";
 import {PostType, postTypeLabel} from "../../model/post-type.enum";
+import {JsonPipe} from "@angular/common";
+import {Hour, Weekday} from "../../model/axis.enum";
 
 @Component({
   selector: 'app-chart',
   standalone: true,
-  imports: [ AgChartsAngular ],
+  imports: [AgChartsAngular, JsonPipe],
   templateUrl: './chart.component.html',
   styleUrl: './chart.component.scss'
 })
@@ -37,6 +39,7 @@ export class ChartComponent {
             text: 'Hour of the day (UTC)',
             fontFamily: 'Titillium Web',
           },
+          gridLine: { enabled: true },
         },
         {
           type: 'category',
@@ -45,6 +48,7 @@ export class ChartComponent {
             text: 'Day of the week (UTC)',
             fontFamily: 'Titillium Web',
           },
+          gridLine: { enabled: true },
         },
       ],
     };
