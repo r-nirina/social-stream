@@ -6,4 +6,4 @@ export interface PostStat {
   postsCount: number;
 }
 
-export type PostStatsSorted = Partial<Record<Weekday, Partial<Record<Hour, PostStat>>>>;
+export type PostStatsIndex = Partial<Record<Weekday, Partial<Record<Hour, PostStat>>>>;
